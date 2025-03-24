@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Blueprint, jsonify, request
 import violence_governance_core as vgc
 import os
 import json
@@ -6,37 +6,55 @@ import uuid
 import datetime
 from baidu_nlp import BaiduNLP
 
-app = Flask(__name__)
+# 初始化蓝图
+api_bp = Blueprint('api', __name__, url_prefix='/api/v1')
 
 # 初始化文本分析器
 text_analyzer = vgc.TextAnalyzer()
 
+# 初始化百度NLP客户端
 api_key = os.environ.get('BAIDU_API_KEY', 'your_default_api_key')
 secret_key = os.environ.get('BAIDU_SECRET_KEY', 'your_default_secret_key')
-
-# 初始化百度NLP客户端
 baidu_nlp = BaiduNLP(api_key, secret_key)
 
-# 简单的话题存储（应该使用数据库但是先这样）
+# 简单的话题存储（实际应用中会使用数据库）
 topics = {}
 
-@app.route('/')
-def index():
-    return render_template('index.html')
 
-
-@app.route('/api/analyze', methods=['POST'])
+@api_bp.route('/analyze', methods=['POST'])
 def analyze_content():
+    """
+    分析内容API端点
+    ---
+    请求:
+      content: 待分析的文本内容
+      content_type: 内容类型（目前仅支持"text"）
+    响应:
+      micro_analysis: 微观内容分析结果
+      micro_action: 建议的干预措施
+      macro_analysis: 宏观话题分析
+      macro_interventions: 话题级干预建议
+    """
     data = request.json
 
     if not data or 'content' not in data:
-        return jsonify({'error': 'Missing content field'}), 400
+        return jsonify({
+            'error': 'Missing content field',
+            'status': 'error',
+            'code': 400
+        }), 400
 
     content = data['content']
     content_type = data.get('content_type', 'text')
 
-    if content_type == 'text':
-        print("接收到的文本内容:", content)
+    if content_type != 'text':
+        return jsonify({
+            'error': f'Unsupported content type: {content_type}',
+            'status': 'error',
+            'code': 400
+        }), 400
+
+    try:
         # 尝试调用百度API进行分析
         sentiment_result = None
         keywords = []
@@ -44,20 +62,16 @@ def analyze_content():
         try:
             # 情感分析
             sentiment_result = baidu_nlp.sentiment_analyze(content)
-            print("百度情感分析结果:", sentiment_result)
 
             # 关键词提取
             try:
                 keyword_items = baidu_nlp.keyword_extract(content, 5)
                 keywords = [item["word"] for item in keyword_items]
-                print("百度关键词提取结果:", keywords)
             except Exception as e:
-                print(f"百度关键词提取失败: {e}")
                 # 使用简单分词作为回退
                 keywords = [word for word in content.lower().split() if len(word) > 3]
 
         except Exception as e:
-            print(f"百度情感分析API调用失败: {e}")
             # 使用本地简单计算作为回退
             local_sentiment = {
                 "sentiment": 1,  # 默认中性
@@ -75,91 +89,53 @@ def analyze_content():
             sentiment_result = local_sentiment
 
         # 微观内容分析 - 确保参数类型正确
-        try:
-            api_key = "demo_key"  # 简化处理
+        api_key = "demo_key"  # 简化处理
 
-            # 计算本地暴力分数
-            local_violence_score = 0.0
-            if "讨厌" in content.lower(): local_violence_score += 0.3
-            if "恨" in content.lower(): local_violence_score += 0.4
-            if "威胁" in content.lower(): local_violence_score += 0.5
-            if "滚" in content.lower(): local_violence_score += 0.4
-            if "垃圾" in content.lower(): local_violence_score += 0.3
-            local_violence_score = min(local_violence_score, 1.0)
+        # 计算本地暴力分数
+        local_violence_score = 0.0
+        if "讨厌" in content.lower(): local_violence_score += 0.3
+        if "恨" in content.lower(): local_violence_score += 0.4
+        if "威胁" in content.lower(): local_violence_score += 0.5
+        if "滚" in content.lower(): local_violence_score += 0.4
+        if "垃圾" in content.lower(): local_violence_score += 0.3
+        local_violence_score = min(local_violence_score, 1.0)
 
-            # 确定暴力类型
-            violence_type = None
-            if local_violence_score > 0.7:
-                violence_type = "harassment"
+        # 确定暴力类型
+        violence_type = None
+        if local_violence_score > 0.7:
+            violence_type = "harassment"
 
-            # 使用简化版的analyze_text调用，不传递复杂参数
-            analysis = text_analyzer.analyze_text(content, api_key)
+        # 使用简化版的analyze_text调用，不传递复杂参数
+        analysis = text_analyzer.analyze_text(content, api_key)
 
-            # 手动设置百度API分析结果
-            if sentiment_result:
-                if "sentiment" in sentiment_result:
-                    analysis.sentiment = sentiment_result["sentiment"]
-                if "positive_prob" in sentiment_result:
-                    analysis.positive_prob = sentiment_result["positive_prob"]
-                if "negative_prob" in sentiment_result:
-                    analysis.negative_prob = sentiment_result["negative_prob"]
+        # 手动设置百度API分析结果
+        if sentiment_result:
+            if "sentiment" in sentiment_result:
+                analysis.sentiment = sentiment_result["sentiment"]
+            if "positive_prob" in sentiment_result:
+                analysis.positive_prob = sentiment_result["positive_prob"]
+            if "negative_prob" in sentiment_result:
+                analysis.negative_prob = sentiment_result["negative_prob"]
 
-            # 手动设置关键词
-            analysis.keywords = keywords
+        # 手动设置关键词
+        analysis.keywords = keywords
 
-            # 调整暴力分数，结合百度API结果
-            if sentiment_result and "negative_prob" in sentiment_result:
-                analysis.violence_score = (local_violence_score + sentiment_result["negative_prob"]) / 2
-            else:
-                analysis.violence_score = local_violence_score
+        # 调整暴力分数，结合百度API结果
+        if sentiment_result and "negative_prob" in sentiment_result:
+            analysis.violence_score = (local_violence_score + sentiment_result["negative_prob"]) / 2
+        else:
+            analysis.violence_score = local_violence_score
 
-            if violence_type:
-                analysis.violence_type = violence_type
-
-        except Exception as e:
-            print(f"分析处理失败: {e}")
-            # 创建一个简化的分析结果作为回退
-            analysis = vgc.ContentAnalysis(
-                content_id="text-1",
-                content_type="text",
-                violence_score=local_violence_score,
-                violence_type=violence_type if local_violence_score > 0.7 else None,
-                confidence_score=0.7
-            )
-
-        # 简化版话题分析
-        # 生成话题ID（聚类）
-        topic_id = f"topic-{str(uuid.uuid4())[:8]}"
-
-        # 计算风险评分
-        violence_risk_score = analysis.violence_score
-        if hasattr(analysis, 'negative_prob') and analysis.negative_prob is not None:
-            # 融合消极概率到风险评分
-            violence_risk_score = (violence_risk_score + analysis.negative_prob) / 2
-
-        # 创建简单的话题分析结果
-        topic_analysis = {
-            "topic_id": topic_id,
-            "keywords": keywords,
-            "start_time": datetime.datetime.now(datetime.UTC).isoformat(),
-            "last_update": datetime.datetime.now(datetime.UTC).isoformat(),
-            "sentiment_score": -analysis.violence_score,  # 简化处理
-            "negativity_ratio": getattr(analysis, 'negative_prob', analysis.violence_score),
-            "violence_risk_score": violence_risk_score,
-            "content_count": 1,
-            "users_involved": 1,
-            "growth_rate": 0.0,
-            "intervention_status": "Monitoring"
-        }
-
-        # 存储话题
-        topics[topic_id] = topic_analysis
+        if violence_type:
+            analysis.violence_type = violence_type
 
         # 应用规则引擎
         action = vgc.determine_action(analysis)
-        print(f"Rust规则引擎结果: {action.action_type}, {action.severity}, {action.message}")
 
-        # 计算风险评分（结合Rust分析结果）
+        # 生成话题ID
+        topic_id = f"topic-{str(uuid.uuid4())[:8]}"
+
+        # 计算风险评分
         violence_risk_score = analysis.violence_score
         if hasattr(analysis, 'negative_prob') and analysis.negative_prob is not None:
             # 融合消极概率到风险评分
@@ -173,7 +149,7 @@ def analyze_content():
         elif action.severity == "medium":
             violence_risk_score = max(violence_risk_score, 0.5)
 
-        # 设置干预状态（基于Rust规则引擎结果）
+        # 设置干预状态
         intervention_status = "Monitoring"
         if action.severity == "critical":
             intervention_status = "ActiveIntervention"
@@ -182,7 +158,7 @@ def analyze_content():
         elif action.severity == "medium" and violence_risk_score > 0.5:
             intervention_status = "EarlyWarning"
 
-        # 创建简单的话题分析结果
+        # 创建话题分析结果
         topic_analysis = {
             "topic_id": topic_id,
             "keywords": keywords,
@@ -197,10 +173,13 @@ def analyze_content():
             "intervention_status": intervention_status
         }
 
-        # 生成简单的干预建议
+        # 存储话题
+        topics[topic_id] = topic_analysis
+
+        # 生成干预建议
         macro_interventions = []
 
-        # 基于Rust规则引擎的结果生成干预建议
+        # 基于严重程度生成干预建议
         if action.severity == "critical":
             macro_interventions = [
                 {
@@ -265,33 +244,101 @@ def analyze_content():
 
         # 构建返回结果
         result = {
-            'micro_analysis': {
-                'content_id': analysis.content_id,
-                'content_type': analysis.content_type,
-                'violence_score': analysis.violence_score,
-                'violence_type': analysis.violence_type,
-                'confidence_score': analysis.confidence_score,
-                'is_violent': analysis.is_violent(),
-                'is_negative': analysis.is_negative(),
-                'sentiment': getattr(analysis, 'sentiment', None),
-                'positive_prob': getattr(analysis, 'positive_prob', None),
-                'negative_prob': getattr(analysis, 'negative_prob', None),
-                'keywords': getattr(analysis, 'keywords', [])
-            },
-            'micro_action': {
-                'action_type': action.action_type,
-                'severity': action.severity,
-                'message': action.message,
-                'automated': action.automated
-            },
-            'macro_analysis': topic_analysis,
-            'macro_interventions': macro_interventions
+            'status': 'success',
+            'code': 200,
+            'data': {
+                'micro_analysis': {
+                    'content_id': analysis.content_id,
+                    'content_type': analysis.content_type,
+                    'violence_score': analysis.violence_score,
+                    'violence_type': analysis.violence_type,
+                    'confidence_score': analysis.confidence_score,
+                    'is_violent': analysis.is_violent(),
+                    'is_negative': analysis.is_negative(),
+                    'sentiment': getattr(analysis, 'sentiment', None),
+                    'positive_prob': getattr(analysis, 'positive_prob', None),
+                    'negative_prob': getattr(analysis, 'negative_prob', None),
+                    'keywords': getattr(analysis, 'keywords', [])
+                },
+                'micro_action': {
+                    'action_type': action.action_type,
+                    'severity': action.severity,
+                    'message': action.message,
+                    'automated': action.automated
+                },
+                'macro_analysis': topic_analysis,
+                'macro_interventions': macro_interventions
+            }
         }
 
         return jsonify(result)
-    else:
-        return jsonify({'error': f'Unsupported content type: {content_type}'}), 400
+
+    except Exception as e:
+        # 统一的错误处理
+        return jsonify({
+            'error': str(e),
+            'status': 'error',
+            'code': 500
+        }), 500
 
 
-if __name__ == '__main__':
-    app.run(debug=True)
+@api_bp.route('/topics/<topic_id>', methods=['GET'])
+def get_topic(topic_id):
+    """
+    获取话题分析结果API端点
+    ---
+    请求参数:
+      topic_id: 话题ID
+    响应:
+      话题分析结果
+    """
+    if topic_id not in topics:
+        return jsonify({
+            'error': f'Topic not found: {topic_id}',
+            'status': 'error',
+            'code': 404
+        }), 404
+
+    return jsonify({
+        'status': 'success',
+        'code': 200,
+        'data': topics[topic_id]
+    })
+
+
+@api_bp.route('/topics', methods=['GET'])
+def list_topics():
+    """
+    获取所有话题列表API端点
+    ---
+    响应:
+      话题列表
+    """
+    return jsonify({
+        'status': 'success',
+        'code': 200,
+        'data': {
+            'topics': list(topics.values()),
+            'count': len(topics)
+        }
+    })
+
+
+@api_bp.route('/status', methods=['GET'])
+def api_status():
+    """
+    API状态检查端点
+    ---
+    响应:
+      服务状态信息
+    """
+    return jsonify({
+        'status': 'success',
+        'code': 200,
+        'data': {
+            'service': 'network_violence_governance_api',
+            'version': '1.0.0',
+            'status': 'running',
+            'timestamp': datetime.datetime.now(datetime.UTC).isoformat()
+        }
+    })

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>网络暴力治理AI系统 API文档</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .endpoint {
+            margin-bottom: 30px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+        }
+        .endpoint h3 {
+            margin-top: 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .method {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .get {
+            background-color: #61affe;
+            color: white;
+        }
+        .post {
+            background-color: #49cc90;
+            color: white;
+        }
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+        }
+        .try-it {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        button {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        textarea {
+            width: 100%;
+            height: 80px;
+            margin-bottom: 10px;
+            padding: 8px;
+        }
+        .response {
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>网络暴力治理AI系统 API文档</h1>
+    <p>本文档介绍了网络暴力治理AI系统提供的API端点及其使用方法。</p>
+
+    <h2>基本信息</h2>
+    <p>基础URL: <code>/api/v1</code></p>
+    <p>所有API响应均为JSON格式，包含以下字段：</p>
+    <ul>
+        <li><code>status</code>: "success" 或 "error"</li>
+        <li><code>code</code>: HTTP状态码</li>
+        <li><code>data</code>: 响应数据 (成功时)</li>
+        <li><code>error</code>: 错误信息 (失败时)</li>
+    </ul>
+
+    <h2>API端点</h2>
+
+    <div class="endpoint">
+        <h3><span class="method post">POST</span> /api/v1/analyze</h3>
+        <p>分析内容中的网络暴力倾向，提供微观内容分析和宏观话题分析。</p>
+
+        <h4>请求参数</h4>
+        <pre>{
+  "content": "要分析的文本内容",
+  "content_type": "text" // 目前仅支持text类型
+}</pre>
+
+        <h4>响应示例</h4>
+        <pre>{
+  "status": "success",
+  "code": 200,
+  "data": {
+    "micro_analysis": {
+      "content_id": "text-1",
+      "content_type": "text",
+      "violence_score": 0.3,
+      "violence_type": null,
+      "confidence_score": 0.85,
+      "is_violent": false,
+      "is_negative": false,
+      "sentiment": 1,
+      "positive_prob": 0.6,
+      "negative_prob": 0.4,
+      "keywords": ["关键词1", "关键词2"]
+    },
+    "micro_action": {
+      "action_type": "warning",
+      "severity": "medium",
+      "message": "请注意您的言论，避免伤害他人",
+      "automated": false
+    },
+    "macro_analysis": {
+      "topic_id": "topic-12345678",
+      "keywords": ["关键词1", "关键词2"],
+      "start_time": "2025-03-24T15:30:45.123456Z",
+      "last_update": "2025-03-24T15:30:45.123456Z",
+      "sentiment_score": -0.3,
+      "negativity_ratio": 0.4,
+      "violence_risk_score": 0.35,
+      "content_count": 1,
+      "users_involved": 1,
+      "growth_rate": 0.0,
+      "intervention_status": "Monitoring"
+    },
+    "macro_interventions": [
+      {
+        "strategy_type": "Monitoring",
+        "priority": 3,
+        "target_audience": "SystemOnly",
+        "description": "加强对该话题的监控，定期评估风险变化",
+        "estimated_impact": 0.3
+      }
+    ]
+  }
+}</pre>
+
+        <div class="try-it">
+            <h4>试一试</h4>
+            <textarea id="analyze-content" placeholder='{"content": "这是一段测试文本", "content_type": "text"}'></textarea>
+            <button onclick="tryAnalyze()">发送请求</button>
+            <div id="analyze-response" class="response">
+                <h4>响应</h4>
+                <pre id="analyze-result"></pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="endpoint">
+        <h3><span class="method get">GET</span> /api/v1/topics/{topic_id}</h3>
+        <p>获取指定话题的分析结果。</p>
+
+        <h4>URL参数</h4>
+        <ul>
+            <li><code>topic_id</code>: 话题ID</li>
+        </ul>
+
+        <h4>响应示例</h4>
+        <pre>{
+  "status": "success",
+  "code": 200,
+  "data": {
+    "topic_id": "topic-12345678",
+    "keywords": ["关键词1", "关键词2"],
+    "start_time": "2025-03-24T15:30:45.123456Z",
+    "last_update": "2025-03-24T15:30:45.123456Z",
+    "sentiment_score": -0.3,
+    "negativity_ratio": 0.4,
+    "violence_risk_score": 0.35,
+    "content_count": 1,
+    "users_involved": 1,
+    "growth_rate": 0.0,
+    "intervention_status": "Monitoring"
+  }
+}</pre>
+    </div>
+
+    <div class="endpoint">
+        <h3><span class="method get">GET</span> /api/v1/topics</h3>
+        <p>获取所有话题列表。</p>
+
+        <h4>响应示例</h4>
+        <pre>{
+  "status": "success",
+  "code": 200,
+  "data": {
+    "topics": [
+      {
+        "topic_id": "topic-12345678",
+        "keywords": ["关键词1", "关键词2"],
+        // 其他话题字段...
+      },
+      // 更多话题...
+    ],
+    "count": 1
+  }
+}</pre>
+    </div>
+
+    <div class="endpoint">
+        <h3><span class="method get">GET</span> /api/v1/status</h3>
+        <p>获取API服务状态。</p>
+
+        <h4>响应示例</h4>
+        <pre>{
+  "status": "success",
+  "code": 200,
+  "data": {
+    "service": "network_violence_governance_api",
+    "version": "1.0.0",
+    "status": "running",
+    "timestamp": "2025-03-24T15:30:45.123456Z"
+  }
+}</pre>
+
+        <div class="try-it">
+            <h4>试一试</h4>
+            <button onclick="tryStatus()">发送请求</button>
+            <div id="status-response" class="response">
+                <h4>响应</h4>
+                <pre id="status-result"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function tryAnalyze() {
+            const content = document.getElementById('analyze-content').value;
+            try {
+                const data = JSON.parse(content);
+
+                fetch('/api/v1/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(result => {
+                    document.getElementById('analyze-result').textContent = JSON.stringify(result, null, 2);
+                    document.getElementById('analyze-response').style.display = 'block';
+                })
+                .catch(error => {
+                    document.getElementById('analyze-result').textContent = 'Error: ' + error.message;
+                    document.getElementById('analyze-response').style.display = 'block';
+                });
+            } catch (e) {
+                document.getElementById('analyze-result').textContent = 'Invalid JSON: ' + e.message;
+                document.getElementById('analyze-response').style.display = 'block';
+            }
+        }
+
+        function tryStatus() {
+            fetch('/api/v1/status')
+                .then(response => response.json())
+                .then(result => {
+                    document.getElementById('status-result').textContent = JSON.stringify(result, null, 2);
+                    document.getElementById('status-response').style.display = 'block';
+                })
+                .catch(error => {
+                    document.getElementById('status-result').textContent = 'Error: ' + error.message;
+                    document.getElementById('status-response').style.display = 'block';
+                });
+        }
+    </script>
+</body>
+</html>
