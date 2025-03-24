@@ -6,711 +6,363 @@
     <title>网络暴力治理AI系统</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Work+Sans:wght@300;400;600&display=swap');
-
-        :root {
-            --primary-black: #0a0a0a;
-            --secondary-black: #1a1a1a;
-            --primary-white: #f5f5f5;
-            --secondary-white: #e0e0e0;
-            --accent-gray: #333333;
-            --positive-color: #d4d4d4;
-            --negative-color: #3a3a3a;
-            --high-risk: #8c8c8c;
-            --medium-risk: #555555;
-            --low-risk: #d4d4d4;
-        }
-
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            transition: all 0.3s ease;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
         }
 
         body {
-            font-family: 'Work Sans', sans-serif;
-            background-color: var(--primary-black);
-            color: var(--primary-white);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow-x: hidden;
+            background-color: #ffffff;
+            color: #333333;
+            line-height: 1.6;
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 40px 20px;
-            position: relative;
-        }
-
-        /* Floating shapes */
-        .floating-shape {
-            position: absolute;
-            z-index: -1;
-            opacity: 0.1;
-            filter: blur(2px);
-            animation: float 15s infinite ease-in-out;
-        }
-
-        .shape1 {
-            top: 10%;
-            left: -5%;
-            width: 300px;
-            height: 300px;
-            border-radius: 43% 57% 70% 30% / 30% 43% 57% 70%;
-            background: var(--secondary-white);
-            animation-delay: 0s;
-        }
-
-        .shape2 {
-            bottom: 20%;
-            right: -5%;
-            width: 250px;
-            height: 250px;
-            border-radius: 59% 41% 27% 73% / 73% 59% 41% 27%;
-            background: var(--secondary-white);
-            animation-delay: -5s;
-        }
-
-        .shape3 {
-            top: 50%;
-            left: 10%;
-            width: 150px;
-            height: 150px;
-            border-radius: 30% 70% 70% 30% / 30% 32% 68% 70%;
-            background: var(--secondary-white);
-            animation-delay: -10s;
-        }
-
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0) rotate(0deg);
-            }
-            50% {
-                transform: translateY(-20px) rotate(5deg);
-            }
+            padding: 40px;
         }
 
         header {
-            margin-bottom: 60px;
+            margin-bottom: 40px;
             text-align: center;
-            position: relative;
         }
 
         h1 {
-            font-family: 'Space Mono', monospace;
-            font-size: 2.5rem;
-            font-weight: 700;
+            font-size: 28px;
+            font-weight: 500;
+            color: #333;
             margin-bottom: 10px;
-            letter-spacing: -1px;
-            position: relative;
-            display: inline-block;
-        }
-
-        h1::after {
-            content: "";
-            position: absolute;
-            width: 30%;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, var(--primary-white), transparent);
-            bottom: -10px;
-            left: 35%;
         }
 
         .subtitle {
-            font-weight: 300;
-            opacity: 0.8;
-            margin-top: 20px;
+            font-size: 16px;
+            color: #666;
         }
 
-        /* Analyzer */
-        .analyzer {
-            background-color: var(--secondary-black);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            margin-bottom: 40px;
+        /* Main content */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
         }
 
-        .analyzer textarea {
-            width: 100%;
-            height: 120px;
-            background-color: var(--primary-black);
-            border: 1px solid var(--accent-gray);
+        /* Input section */
+        .input-section {
+            background: #f9f9f9;
             border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
             padding: 15px;
-            color: var(--primary-white);
-            font-family: 'Work Sans', sans-serif;
-            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
             resize: none;
             margin-bottom: 20px;
+            font-size: 14px;
         }
 
-        .analyzer textarea:focus {
+        textarea:focus {
             outline: none;
-            border-color: var(--primary-white);
-            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+            border-color: #aaa;
         }
 
-        .analyzer-btn {
-            background-color: var(--primary-white);
-            color: var(--primary-black);
+        .analyze-btn {
+            background: #333;
+            color: white;
             border: none;
-            padding: 12px 30px;
-            border-radius: 30px;
-            font-family: 'Space Mono', monospace;
-            font-weight: 700;
-            font-size: 1rem;
+            padding: 10px 20px;
+            border-radius: 5px;
             cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
+            font-size: 14px;
+            transition: background 0.3s;
         }
 
-        .analyzer-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
-        }
-
-        .analyzer-btn:active {
-            transform: translateY(0);
-        }
-
-        .analyzer-btn span {
-            position: relative;
-            z-index: 1;
-        }
-
-        .loading {
-            display: none;
-            margin: 20px 0;
-            font-family: 'Space Mono', monospace;
-            letter-spacing: 1px;
-            text-align: center;
-        }
-
-        .loading-animation {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid transparent;
-            border-top-color: var(--primary-white);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            vertical-align: middle;
-            margin-right: 10px;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .error {
-            display: none;
-            background-color: rgba(30, 30, 30, 0.7);
-            border: 1px solid var(--high-risk);
-            color: var(--primary-white);
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
-            text-align: center;
+        .analyze-btn:hover {
+            background: #555;
         }
 
         /* Results section */
-        .result {
-            display: none;
-            position: relative;
-        }
-
-        .result-grid {
+        .results-section {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-bottom: 40px;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
         }
 
         .result-card {
-            background-color: var(--secondary-black);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .result-card::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary-white), transparent);
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
         .result-card h3 {
-            font-family: 'Space Mono', monospace;
-            margin-bottom: 20px;
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 15px;
+            color: #333;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
-        .result-icon {
-            font-size: 1.5rem;
-            opacity: 0.8;
+        .card-icon {
+            color: #555;
         }
 
-        .result-data {
-            margin-bottom: 15px;
-        }
-
-        .result-row {
+        .info-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 12px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 10px;
+            font-size: 14px;
         }
 
-        .result-row:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
+        .info-label {
+            color: #666;
         }
 
-        .result-label {
-            font-weight: 300;
-            opacity: 0.8;
+        .info-value {
+            font-weight: 500;
         }
 
-        .result-value {
-            font-weight: 600;
-            text-align: right;
+        .progress-container {
+            margin: 15px 0;
         }
 
-        /* Visualization components */
-        .meter-container {
-            margin: 20px 0;
-            position: relative;
-        }
-
-        .meter-label {
+        .progress-label {
             display: flex;
             justify-content: space-between;
             margin-bottom: 5px;
-            font-size: 0.9rem;
+            font-size: 12px;
         }
 
-        .meter-track {
-            width: 100%;
-            height: 10px;
-            background-color: var(--accent-gray);
-            border-radius: 5px;
+        .progress-bar {
+            height: 6px;
+            background: #eee;
+            border-radius: 3px;
             overflow: hidden;
         }
 
-        .meter-fill {
+        .progress-fill {
             height: 100%;
+            background: #333;
             width: 0%;
-            border-radius: 5px;
-            transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: width 1s ease;
         }
 
-        .high-risk .meter-fill {
-            background-color: var(--high-risk);
+        .high-risk .progress-fill {
+            background: #888;
         }
 
-        .medium-risk .meter-fill {
-            background-color: var(--medium-risk);
-        }
-
-        .low-risk .meter-fill {
-            background-color: var(--low-risk);
+        .low-risk .progress-fill {
+            background: #ccc;
         }
 
         /* Tags */
-        .tags-container {
+        .tags {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 15px;
+            gap: 5px;
+            margin-top: 10px;
         }
 
         .tag {
-            background-color: var(--accent-gray);
-            color: var(--primary-white);
-            font-size: 0.8rem;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-weight: 300;
-        }
-
-        /* Sentiment display */
-        .sentiment-container {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin: 20px 0;
-        }
-
-        .sentiment-emoji {
-            font-size: 2rem;
-            line-height: 1;
-        }
-
-        .sentiment-scales {
-            flex-grow: 1;
-        }
-
-        .sentiment-scale {
-            height: 6px;
-            background: linear-gradient(to right, var(--negative-color), var(--positive-color));
+            font-size: 12px;
+            background: #eee;
+            padding: 4px 8px;
             border-radius: 3px;
-            position: relative;
-            margin-bottom: 8px;
-        }
-
-        .sentiment-marker {
-            position: absolute;
-            width: 12px;
-            height: 12px;
-            background-color: var(--primary-white);
-            border-radius: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            left: 50%;
-            transition: left 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        /* Radar chart */
-        .radar-chart-container {
-            position: relative;
-            width: 100%;
-            height: 250px;
-            margin: 20px 0;
-        }
-
-        .radar-chart {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
         }
 
         /* Intervention section */
         .interventions {
-            margin-top: 40px;
-            background-color: var(--secondary-black);
-            border-radius: 20px;
-            padding: 25px;
+            grid-column: span 2;
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            margin-top: 20px;
         }
 
         .intervention-list {
             list-style: none;
+            margin-top: 15px;
         }
 
         .intervention-item {
-            padding: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 10px;
         }
 
         .intervention-item:last-child {
             border-bottom: none;
         }
 
-        .intervention-priority {
-            min-width: 80px;
-            text-align: center;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            background-color: var(--accent-gray);
+        .priority-badge {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 3px;
+            background: #eee;
         }
 
         .priority-high {
-            background-color: rgba(140, 140, 140, 0.2);
-            color: var(--high-risk);
+            background: #f0f0f0;
+            color: #333;
         }
 
         .priority-medium {
-            background-color: rgba(85, 85, 85, 0.2);
-            color: var(--medium-risk);
+            background: #f5f5f5;
+            color: #666;
         }
 
-        .priority-low {
-            background-color: rgba(212, 212, 212, 0.1);
-            color: var(--low-risk);
+        .loading, .error {
+            display: none;
+            text-align: center;
+            padding: 15px;
+            grid-column: span 2;
         }
 
-        /* Media queries */
-        @media (min-width: 1024px) {
+        .loading {
+            color: #666;
+        }
+
+        .error {
+            color: #666;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .results-section {
+                grid-template-columns: 1fr;
+            }
+
+            .interventions {
+                grid-column: span 1;
+            }
+
             .container {
-                max-width: 1200px;
-                padding: 50px;
-            }
-
-            .result-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-
-            .analyzer {
-                display: grid;
-                grid-template-columns: 2fr 1fr;
-                grid-gap: 30px;
-                align-items: center;
-            }
-
-            .analyzer textarea {
-                height: 160px;
-            }
-
-            .analyzer-btn-container {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: 100%;
-            }
-
-            .result-row {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
-
-            /* 专为电脑设计的两列布局 */
-            .desktop-layout {
-                display: grid;
-                grid-template-columns: 2fr 1fr;
-                gap: 30px;
-            }
-
-            .main-column {
-                display: flex;
-                flex-direction: column;
-                gap: 30px;
-            }
-
-            .side-column {
-                display: flex;
-                flex-direction: column;
-                gap: 30px;
-            }
-
-            /* 水平标题布局 */
-            header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 40px;
-            }
-
-            header h1 {
-                margin-bottom: 0;
-            }
-
-            header h1::after {
-                content: none;
-            }
-
-            header .subtitle {
-                margin-top: 0;
-                text-align: right;
-                max-width: 400px;
-            }
-
-            /* 卡片内部横向布局 */
-            .horizontal-card-content {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 30px;
-            }
-
-            /* 雷达图调整 */
-            .radar-chart-container {
-                height: 280px;
+                padding: 20px;
             }
         }
     </style>
-    <!-- 确保Chart.js库正确加载 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/3.7.0/chart.min.js" integrity="sha512-TW5s0IT/IppJtu76UbysrBH9Hy/5X41OTAbQuffZFU6lQ1rdcLHzpU5BzVvr/YFykoiMYZVWlr/PX1mDcfM9Qg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
     <div class="container">
-        <!-- Floating shapes for surrealist effect -->
-        <div class="floating-shape shape1"></div>
-        <div class="floating-shape shape2"></div>
-        <div class="floating-shape shape3"></div>
-
         <header>
             <h1>网络暴力治理AI系统</h1>
         </header>
 
-        <section class="analyzer">
-            <textarea id="content" placeholder="请输入要分析的内容..."></textarea>
-            <div class="analyzer-btn-container">
-                <button id="analyze" class="analyzer-btn">
-                    <span>分析内容</span>
-                </button>
+        <div class="main-content">
+            <div class="input-section">
+                <textarea id="content" placeholder="请输入要分析的内容..."></textarea>
+                <button id="analyze" class="analyze-btn">分析内容</button>
             </div>
-        </section>
 
-        <div class="loading" id="loading">
-            <span class="loading-animation"></span>
-            <span>分析数据中，请稍候...</span>
-        </div>
-
-        <div class="error" id="error"></div>
-
-        <section class="result" id="result">
-            <div class="desktop-layout">
-                <div class="main-column">
-                    <!-- Micro Analysis Card -->
-                    <div class="result-card">
-                        <h3><i class="fas fa-microscope result-icon"></i> 微观内容分析</h3>
-
-                        <div class="horizontal-card-content">
-                            <div class="left-part">
-                                <div class="sentiment-container">
-                                    <div class="sentiment-emoji" id="sentiment-emoji">😐</div>
-                                    <div class="sentiment-scales">
-                                        <div class="sentiment-scale">
-                                            <div class="sentiment-marker" id="sentiment-marker"></div>
-                                        </div>
-                                        <div class="meter-label">
-                                            <span>消极</span>
-                                            <span>积极</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="meter-container" id="violence-meter">
-                                    <div class="meter-label">
-                                        <span>暴力分数</span>
-                                        <span id="violence-score">0%</span>
-                                    </div>
-                                    <div class="meter-track">
-                                        <div class="meter-fill" id="violence-fill"></div>
-                                    </div>
-                                </div>
-
-                                <div class="result-data">
-                                    <div class="result-row">
-                                        <div class="result-label">暴力类型</div>
-                                        <div class="result-value" id="violence-type">-</div>
-                                    </div>
-                                    <div class="result-row">
-                                        <div class="result-label">置信度</div>
-                                        <div class="result-value" id="confidence-score">-</div>
-                                    </div>
-                                    <div class="result-row">
-                                        <div class="result-label">是否为负面内容</div>
-                                        <div class="result-value" id="is-negative">-</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="right-part">
-                                <!-- Radar Chart for Content Analysis -->
-                                <div class="radar-chart-container">
-                                    <canvas id="micro-radar-chart" class="radar-chart"></canvas>
-                                </div>
-
-                                <div>
-                                    <div class="result-label">关键词</div>
-                                    <div class="tags-container" id="micro-keywords"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Macro Analysis Card -->
-                    <div class="result-card">
-                        <h3><i class="fas fa-globe result-icon"></i> 话题分析</h3>
-
-                        <div class="horizontal-card-content">
-                            <div class="left-part">
-                                <div class="meter-container" id="risk-meter">
-                                    <div class="meter-label">
-                                        <span>风险评分</span>
-                                        <span id="risk-score">0%</span>
-                                    </div>
-                                    <div class="meter-track">
-                                        <div class="meter-fill" id="risk-fill"></div>
-                                    </div>
-                                </div>
-
-                                <div class="result-data">
-                                    <div class="result-row">
-                                        <div class="result-label">话题ID</div>
-                                        <div class="result-value" id="topic-id">-</div>
-                                    </div>
-                                    <div class="result-row">
-                                        <div class="result-label">内容数量</div>
-                                        <div class="result-value" id="content-count">-</div>
-                                    </div>
-                                    <div class="result-row">
-                                        <div class="result-label">干预状态</div>
-                                        <div class="result-value" id="intervention-status">-</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="right-part">
-                                <!-- Topic Trend Visualization (Placeholder for a chart) -->
-                                <div class="radar-chart-container">
-                                    <canvas id="topic-trend-chart" class="radar-chart"></canvas>
-                                </div>
-
-                                <div>
-                                    <div class="result-label">话题关键词</div>
-                                    <div class="tags-container" id="macro-keywords"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <div class="results-container">
+                <div class="loading" id="loading">
+                    <span>分析中，请稍候...</span>
                 </div>
 
-                <div class="side-column">
-                    <!-- Action Card -->
-                    <div class="result-card">
-                        <h3><i class="fas fa-bolt result-icon"></i> 建议操作</h3>
+                <div class="error" id="error"></div>
 
-                        <div class="result-data">
-                            <div class="result-row">
-                                <div class="result-label">操作类型</div>
-                                <div class="result-value" id="action-type">-</div>
+                <div class="results-section" id="results" style="display: none;">
+                    <!-- 微观分析 -->
+                    <div class="result-card">
+                        <h3><i class="fas fa-microscope card-icon"></i> 内容分析</h3>
+
+                        <div class="progress-container" id="violence-meter">
+                            <div class="progress-label">
+                                <span>暴力分数</span>
+                                <span id="violence-score">0%</span>
                             </div>
-                            <div class="result-row">
-                                <div class="result-label">严重程度</div>
-                                <div class="result-value" id="severity">-</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="violence-fill"></div>
                             </div>
-                            <div class="result-row">
-                                <div class="result-label">详细信息</div>
-                                <div class="result-value" id="action-message">-</div>
+                        </div>
+
+                        <div class="info-row">
+                            <div class="info-label">情感倾向</div>
+                            <div class="info-value" id="sentiment">-</div>
+                        </div>
+
+                        <div class="info-row">
+                            <div class="info-label">暴力类型</div>
+                            <div class="info-value" id="violence-type">-</div>
+                        </div>
+
+                        <div class="info-row">
+                            <div class="info-label">置信度</div>
+                            <div class="info-value" id="confidence">-</div>
+                        </div>
+
+                        <div class="info-row">
+                            <div class="info-label">关键词</div>
+                        </div>
+                        <div class="tags" id="keywords"></div>
+                    </div>
+
+                    <!-- 建议操作 -->
+                    <div class="result-card">
+                        <h3><i class="fas fa-bolt card-icon"></i> 建议操作</h3>
+
+                        <div class="info-row">
+                            <div class="info-label">操作类型</div>
+                            <div class="info-value" id="action-type">-</div>
+                        </div>
+
+                        <div class="info-row">
+                            <div class="info-label">严重程度</div>
+                            <div class="info-value" id="severity">-</div>
+                        </div>
+
+                        <div class="info-row">
+                            <div class="info-label">消息</div>
+                            <div class="info-value" id="message">-</div>
+                        </div>
+
+                        <div class="progress-container" id="risk-meter">
+                            <div class="progress-label">
+                                <span>话题风险评分</span>
+                                <span id="risk-score">0%</span>
                             </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="risk-fill"></div>
+                            </div>
+                        </div>
+
+                        <div class="info-row">
+                            <div class="info-label">话题ID</div>
+                            <div class="info-value" id="topic-id">-</div>
+                        </div>
+
+                        <div class="info-row">
+                            <div class="info-label">内容数量</div>
+                            <div class="info-value" id="content-count">-</div>
                         </div>
                     </div>
 
-                    <!-- Interventions Section -->
-                    <div class="result-card">
-                        <h3><i class="fas fa-shield-alt result-icon"></i> 话题干预建议</h3>
+                    <!-- 干预建议 -->
+                    <div class="interventions">
+                        <h3><i class="fas fa-shield-alt card-icon"></i> 干预建议</h3>
                         <ul class="intervention-list" id="intervention-list"></ul>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
     </div>
 
     <script>
@@ -724,9 +376,9 @@
             // 显示加载状态
             document.getElementById('loading').style.display = 'block';
             document.getElementById('error').style.display = 'none';
-            document.getElementById('result').style.display = 'none';
+            document.getElementById('results').style.display = 'none';
 
-            // 模拟API调用，替换为实际API
+            // 模拟API调用
             fetch('/api/analyze', {
                 method: 'POST',
                 headers: {
@@ -746,10 +398,10 @@
             .then(data => {
                 // 隐藏加载状态
                 document.getElementById('loading').style.display = 'none';
-                document.getElementById('result').style.display = 'block';
+                document.getElementById('results').style.display = 'grid';
 
                 // 更新UI
-                updateAnalysisResults(data);
+                updateResults(data);
             })
             .catch(error => {
                 // 隐藏加载状态，显示错误
@@ -768,105 +420,90 @@
         function mockAnalysisForDemo() {
             const mockData = {
                 micro_analysis: {
-                    violence_score: 0.72,
-                    violence_type: "人身攻击",
-                    confidence_score: 0.89,
+                    violence_score: 0.65,
+                    violence_type: "言语攻击",
+                    confidence_score: 0.82,
                     is_negative: true,
                     sentiment: 0,
-                    positive_prob: 0.15,
-                    negative_prob: 0.85,
-                    keywords: ["侮辱", "攻击", "谩骂", "威胁"]
+                    positive_prob: 0.18,
+                    negative_prob: 0.82,
+                    keywords: ["侮辱", "攻击", "谩骂"]
                 },
                 micro_action: {
-                    action_type: "屏蔽",
-                    severity: "高",
-                    message: "内容包含明显的人身攻击语言"
+                    action_type: "警告",
+                    severity: "中",
+                    message: "内容包含轻微的言语攻击"
                 },
                 macro_analysis: {
                     topic_id: "T-20230418-005",
-                    keywords: ["网络暴力", "欺凌", "人身攻击", "争议"],
-                    content_count: 358,
-                    violence_risk_score: 0.68,
-                    intervention_status: "需要干预"
+                    keywords: ["网络暴力", "言语攻击"],
+                    content_count: 245,
+                    violence_risk_score: 0.48,
+                    intervention_status: "观察中"
                 },
                 macro_interventions: [
                     {
-                        description: "内容审核阈值调整",
-                        priority: "高"
-                    },
-                    {
-                        description: "用户提醒与教育",
+                        description: "内容审核提示",
                         priority: "中"
                     },
                     {
-                        description: "相关话题24小时监控",
-                        priority: "高"
+                        description: "定期监控话题发展",
+                        priority: "中"
                     }
                 ]
             };
 
             // 更新UI
-            document.getElementById('result').style.display = 'block';
-            updateAnalysisResults(mockData);
+            document.getElementById('results').style.display = 'grid';
+            updateResults(mockData);
         }
 
-        // 更新结果UI
-        function updateAnalysisResults(data) {
+        function updateResults(data) {
             // 微观分析
             const violenceScore = (data.micro_analysis.violence_score * 100).toFixed(1);
             document.getElementById('violence-score').textContent = violenceScore + '%';
             document.getElementById('violence-fill').style.width = violenceScore + '%';
 
             const violenceMeter = document.getElementById('violence-meter');
-            violenceMeter.className = 'meter-container';
-            if (data.micro_analysis.violence_score > 0.7) {
+            if (data.micro_analysis.violence_score > 0.5) {
                 violenceMeter.classList.add('high-risk');
-            } else if (data.micro_analysis.violence_score > 0.4) {
-                violenceMeter.classList.add('medium-risk');
             } else {
                 violenceMeter.classList.add('low-risk');
             }
 
-            document.getElementById('violence-type').textContent = data.micro_analysis.violence_type || '无';
-            document.getElementById('confidence-score').textContent = (data.micro_analysis.confidence_score * 100).toFixed(1) + '%';
-            document.getElementById('is-negative').textContent = data.micro_analysis.is_negative ? '是' : '否';
-
             // 情感分析
-            const sentimentEmoji = document.getElementById('sentiment-emoji');
-            const sentimentMarker = document.getElementById('sentiment-marker');
-
+            let sentimentText = '中性';
             if (data.micro_analysis.sentiment === 0) {
-                sentimentEmoji.textContent = '😟';
-                sentimentMarker.style.left = '20%';
+                sentimentText = '消极';
             } else if (data.micro_analysis.sentiment === 2) {
-                sentimentEmoji.textContent = '😊';
-                sentimentMarker.style.left = '80%';
-            } else {
-                sentimentEmoji.textContent = '😐';
-                sentimentMarker.style.left = '50%';
+                sentimentText = '积极';
             }
+            document.getElementById('sentiment').textContent = sentimentText;
+
+            document.getElementById('violence-type').textContent = data.micro_analysis.violence_type || '无';
+            document.getElementById('confidence').textContent = (data.micro_analysis.confidence_score * 100).toFixed(1) + '%';
 
             // 关键词
-            const microKeywords = document.getElementById('micro-keywords');
-            microKeywords.innerHTML = '';
+            const keywordsDiv = document.getElementById('keywords');
+            keywordsDiv.innerHTML = '';
             if (data.micro_analysis.keywords && data.micro_analysis.keywords.length > 0) {
                 data.micro_analysis.keywords.forEach(keyword => {
                     const tag = document.createElement('span');
                     tag.className = 'tag';
                     tag.textContent = keyword;
-                    microKeywords.appendChild(tag);
+                    keywordsDiv.appendChild(tag);
                 });
             } else {
                 const tag = document.createElement('span');
                 tag.className = 'tag';
                 tag.textContent = '无';
-                microKeywords.appendChild(tag);
+                keywordsDiv.appendChild(tag);
             }
 
             // 建议操作
             document.getElementById('action-type').textContent = data.micro_action.action_type;
             document.getElementById('severity').textContent = data.micro_action.severity;
-            document.getElementById('action-message').textContent = data.micro_action.message || '无';
+            document.getElementById('message').textContent = data.micro_action.message || '无';
 
             // 话题分析
             const riskScore = (data.macro_analysis.violence_risk_score * 100).toFixed(1);
@@ -874,35 +511,14 @@
             document.getElementById('risk-fill').style.width = riskScore + '%';
 
             const riskMeter = document.getElementById('risk-meter');
-            riskMeter.className = 'meter-container';
-            if (data.macro_analysis.violence_risk_score > 0.6) {
+            if (data.macro_analysis.violence_risk_score > 0.5) {
                 riskMeter.classList.add('high-risk');
-            } else if (data.macro_analysis.violence_risk_score > 0.3) {
-                riskMeter.classList.add('medium-risk');
             } else {
                 riskMeter.classList.add('low-risk');
             }
 
             document.getElementById('topic-id').textContent = data.macro_analysis.topic_id;
             document.getElementById('content-count').textContent = data.macro_analysis.content_count;
-            document.getElementById('intervention-status').textContent = data.macro_analysis.intervention_status;
-
-            // 话题关键词
-            const macroKeywords = document.getElementById('macro-keywords');
-            macroKeywords.innerHTML = '';
-            if (data.macro_analysis.keywords && data.macro_analysis.keywords.length > 0) {
-                data.macro_analysis.keywords.forEach(keyword => {
-                    const tag = document.createElement('span');
-                    tag.className = 'tag';
-                    tag.textContent = keyword;
-                    macroKeywords.appendChild(tag);
-                });
-            } else {
-                const tag = document.createElement('span');
-                tag.className = 'tag';
-                tag.textContent = '无';
-                macroKeywords.appendChild(tag);
-            }
 
             // 干预建议
             const interventionList = document.getElementById('intervention-list');
@@ -912,12 +528,10 @@
                     const li = document.createElement('li');
                     li.className = 'intervention-item';
 
-                    // 确保priority是字符串并转为小写
-                    const priorityValue = String(intervention.priority || '').toLowerCase();
-                    const priorityClass = `priority-${priorityValue}`;
+                    const priorityClass = 'priority-' + String(intervention.priority || '').toLowerCase();
 
                     li.innerHTML = `
-                        <span class="intervention-priority ${priorityClass}">${intervention.priority}</span>
+                        <span class="priority-badge ${priorityClass}">${intervention.priority}</span>
                         <span>${intervention.description}</span>
                     `;
 
@@ -929,103 +543,7 @@
                 li.textContent = '无干预建议';
                 interventionList.appendChild(li);
             }
-
-            // 雷达图
-            createRadarChart(data);
         }
-
-        // 创建雷达图
-        function createRadarChart(data) {
-            // 检查Chart对象是否已加载
-            if (typeof Chart === 'undefined') {
-                console.error('Chart.js 库未加载！');
-                return; // 如果没有加载，就退出函数
-            }
-
-            const ctx = document.getElementById('action-radar-chart').getContext('2d');
-
-            // 创建雷达图
-            if (window.actionRadarChart) {
-                window.actionRadarChart.destroy();
-            }
-
-            // 准备数据
-            const radarData = {
-                labels: ['暴力分数', '负面情绪', '严重程度', '干预必要性', '传播风险'],
-                datasets: [{
-                    label: '内容分析',
-                    data: [
-                        data.micro_analysis.violence_score * 100,
-                        data.micro_analysis.negative_prob ? data.micro_analysis.negative_prob * 100 : 50,
-                        data.micro_action.severity === "高" ? 90 : (data.micro_action.severity === "中" ? 60 : 30),
-                        data.macro_analysis.intervention_status === "需要干预" ? 85 : 40,
-                        data.macro_analysis.violence_risk_score * 100
-                    ],
-                    backgroundColor: 'rgba(245, 245, 245, 0.2)',
-                    borderColor: 'rgba(245, 245, 245, 0.8)',
-                    pointBackgroundColor: 'rgba(245, 245, 245, 1)',
-                    pointBorderColor: '#fff',
-                    pointHoverBackgroundColor: '#fff',
-                    pointHoverBorderColor: 'rgba(245, 245, 245, 1)'
-                }]
-            };
-
-            // 创建雷达图
-                            window.actionRadarChart = new Chart(ctx, {
-                type: 'radar',
-                data: radarData,
-                options: {
-                    elements: {
-                        line: {
-                            borderWidth: 3
-                        }
-                    },
-                    scales: {
-                        r: {
-                            angleLines: {
-                                color: 'rgba(255, 255, 255, 0.1)'
-                            },
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
-                            },
-                            pointLabels: {
-                                color: 'rgba(255, 255, 255, 0.7)',
-                                font: {
-                                    family: "'Work Sans', sans-serif",
-                                    size: 12
-                                }
-                            },
-                            ticks: {
-                                color: 'rgba(255, 255, 255, 0.5)',
-                                backdropColor: 'transparent',
-                                font: {
-                                    size: 10
-                                }
-                            },
-                            suggestedMin: 0,
-                            suggestedMax: 100
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
-                }
-            });
-        }
-
-        // 检测是否在演示模式，如果是，自动触发分析
-        window.addEventListener('DOMContentLoaded', () => {
-            // 判断是否为演示模式（为了简化，这里使用URL参数判断）
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('demo') === 'true') {
-                document.getElementById('content').value = "这个是演示模式自动填充的测试内容，包含一些负面言论和攻击性语言。";
-                setTimeout(() => {
-                    document.getElementById('analyze').click();
-                }, 500);
-            }
-        });
     </script>
 </body>
 </html>
